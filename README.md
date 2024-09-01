@@ -114,6 +114,18 @@ Instalar:
         - cd 'nombre_proyecto'
         - npm install (instalar depenencias)
         - npm run dev (correr proyecto)
+    - Extensiones
+        - ES7+ React/Redux/React-Native snippets
+    - Atajos
+        - RFC: React Functional Component
+        - React Developer Tools (Extension navegador)
+
+Componentes:
+    - Componentes Funcionales
+    - Basado en Clases:
+    https://www.youtube.com/watch?v=cQG7gtWURSM
+
+
 
 
 #Estructura del proyecto
