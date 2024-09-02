@@ -114,8 +114,12 @@ Instalar:
         - cd 'nombre_proyecto'
         - npm install (instalar depenencias)
         - npm run dev (correr proyecto)
+    - Dependencias
+        - Firebase
+        - npm install tailwindcss@latest
     - Extensiones
         - ES7+ React/Redux/React-Native snippets
+        - Tailwind CSS IntelliSense
     - Atajos
         - RFC: React Functional Component
         - React Developer Tools (Extension navegador)
@@ -140,3 +144,9 @@ Componentes:
     - pages/: Componentes que representan páginas completas de la aplicación. Suelen contener otros componentes dentro.
     - services/: Para manejar la comunicación con APIs u otros servicios externos. Mantiene el código organizado y desacoplado.
     - utils/: Funciones utilitarias que no pertenecen a ningún componente específico y pueden ser reutilizadas en diferentes partes del proyecto.
+
+
+
+    https://www.youtube.com/watch?v=DIoQirFr6NI
+
+    https://www.youtube.com/watch?v=PT5Tr5V6UU4&list=PLMxuD8_QOm5W3xUaCzmYCrNC13efDrGqJ&index=3
