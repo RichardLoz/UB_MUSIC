@@ -1,4 +1,15 @@
+<<<<<<< HEAD
 @import url(./shared/globalStyles.css);
+=======
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+>>>>>>> 5ada5bd818e25783aa84f95989bd1ce2141ddeed
 
 body{
   margin: 0;

@@ -65,7 +65,7 @@ export default function Login() {
               <div 
                 className="h-100 w-100" 
                 style={{
-                  backgroundImage: `url('src/assets/images/login/login_img.jpg')`,
+                  backgroundImage: `url('src/assets/images/login/login_ub.jpeg')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}

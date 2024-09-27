@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@radix-ui/react-slot": "^1.1.0",
     "bootstrap": "^5.3.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+=======
+    "firebase": "^10.13.1",
+>>>>>>> 5ada5bd818e25783aa84f95989bd1ce2141ddeed
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.5",
     "react-dom": "^18.3.1",
@@ -32,8 +36,13 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+<<<<<<< HEAD
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
+=======
+    "postcss": "^8.4.43",
+    "tailwindcss": "^3.4.10",
+>>>>>>> 5ada5bd818e25783aa84f95989bd1ce2141ddeed
     "vite": "^5.4.1"
   }
 }
