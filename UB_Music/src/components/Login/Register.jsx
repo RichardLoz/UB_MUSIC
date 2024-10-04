@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { FaMusic } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig'; // Importar tu configuración de Firebase
+import { auth } from '../../firebaseConfig'; // Importar tu configuración de Firebase
 import { getFirestore, doc, setDoc } from 'firebase/firestore'; // Importar Firestore
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 
@@ -99,7 +99,7 @@ export default function Register() {
                             </Button>
 
                             <div className="text-center">
-                                <a href="/login" className="text-primary">¿Ya tienes cuenta? Inicia sesión aquí</a>
+                                <a href="/" className="text-primary">¿Ya tienes cuenta? Inicia sesión aquí</a>
                             </div>
                         </Form>
                     </div>
@@ -108,7 +108,7 @@ export default function Register() {
                     <div
                         className="h-100 w-100"
                         style={{
-                            backgroundImage: `url('src/assets/images/register/register_ub.jpeg')`,
+                            backgroundImage: `url('src/assets/images/login/login_ub.jpeg')`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center'
                         }}

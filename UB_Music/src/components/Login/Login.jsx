@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { FaGoogle, FaEye, FaEyeSlash, FaMusic } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './login.css'
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';  // Importar useNavigate
 
 export default function Login() {
@@ -76,7 +77,7 @@ export default function Login() {
                             </Button>
 
                             <div className="text-center mb-3">
-                                <span className="text-muted">O continúa con</span>
+                                <span className="text-primary">O continúa con</span>
                             </div>
 
                             <Button variant="outline-light" className="w-100 mb-3">
@@ -91,8 +92,8 @@ export default function Login() {
 
                         {/* Botón de registro */}
                         <div className="text-center mt-4">
-                            <span className="text-muted">¿No tienes cuenta?</span>
-                            <Button variant="link" onClick={() => navigate("/register")} className="p-0 m-0">
+                            <span className="text-primary">¿No tienes cuenta?</span>
+                            <Button variant="link" onClick={() => navigate("/register")} className="btn-register">
                                 Registrarse
                             </Button>
                         </div>
