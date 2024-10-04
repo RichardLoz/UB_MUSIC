@@ -9,7 +9,8 @@ export default function Home() {
     const [loadingImages, setLoadingImages] = useState(true);
     const [selectedAlbum, setSelectedAlbum] = useState(null);
     const [songs, setSongs] = useState([]);
-    const [loadingAlbumImages, setLoadingAlbumImages] = useState({}); // Estado para la carga de imágenes
+    const [loadingAlbumImages, setLoadingAlbumImages] = useState({});
+    const [playingSong, setPlayingSong] = useState(null); // Estado para la canción en reproducción
 
     useEffect(() => {
         const fetchAlbums = async () => {
@@ -23,14 +24,14 @@ export default function Home() {
                 })
             );
             setAlbums(albumsList);
-            setLoadingImages(false); // Cambiar a false después de cargar todas las imágenes
+            setLoadingImages(false);
         };
 
         fetchAlbums();
     }, []);
 
     const handleImageLoad = (albumId) => {
-        setLoadingAlbumImages((prev) => ({ ...prev, [albumId]: false })); // Ocultar el ícono de carga para la imagen cargada
+        setLoadingAlbumImages((prev) => ({ ...prev, [albumId]: false }));
     };
 
     const handleAlbumClick = async (albumId) => {
@@ -43,6 +44,14 @@ export default function Home() {
             const songsSnapshot = await getDocs(songsCollection);
             const songsList = songsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
             setSongs(songsList);
+        }
+    };
+
+    const handleSongClick = (song) => {
+        if (playingSong === song.ruta) {
+            setPlayingSong(null); // Si ya se está reproduciendo, pausar
+        } else {
+            setPlayingSong(song.ruta); // Establecer la canción a reproducir
         }
     };
 
@@ -88,11 +97,16 @@ export default function Home() {
                             <ListGroup className="mt-3">
                                 {songs.map((song) => (
                                     <ListGroup.Item key={song.id}>
-                                        <strong>{song.nombre}</strong> - {song.duracion} - {song.genero}
+                                        <strong onClick={() => handleSongClick(song)} style={{ cursor: 'pointer' }}>{song.nombre}</strong> - {song.duracion} - {song.genero}
                                         <br />
                                         Popularidad: {song.popularidad}
                                         <br />
-                                        <a href={song.ruta} target="_blank" rel="noopener noreferrer">Escuchar</a>
+                                        {playingSong === song.ruta && (
+                                            <audio controls autoPlay>
+                                                <source src={song.ruta} type="audio/mpeg" />
+                                                Tu navegador no soporta el elemento de audio.
+                                            </audio>
+                                        )}
                                     </ListGroup.Item>
                                 ))}
                             </ListGroup>
