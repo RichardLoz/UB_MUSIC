@@ -1,0 +1,16 @@
+.btn-register {
+    font-weight: bold;
+    color: #007bff;
+    margin-left: 5px;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    text-align: center;
+    transition: color 0.3s ease;
+    background: none;
+}
+
+.btn-register:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
