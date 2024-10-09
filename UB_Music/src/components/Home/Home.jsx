@@ -43,7 +43,14 @@ export default function Home() {
             const songsCollection = collection(db, `albumes/${albumId}/canciones`);
             const songsSnapshot = await getDocs(songsCollection);
             const songsList = songsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setSongs(songsList);
+            
+            // Sort songs by the 'order' attribute before setting the state
+            const sortedSongs = songsList.sort((a, b) => a.orden - b.orden);
+            
+            // Log the sorted songs for debugging
+            console.log('Songs for Album', albumId, sortedSongs);
+            
+            setSongs(sortedSongs);
         }
     };
 
@@ -97,7 +104,7 @@ export default function Home() {
                             <ListGroup className="mt-3">
                                 {songs.map((song) => (
                                     <ListGroup.Item key={song.id}>
-                                        <strong onClick={() => handleSongClick(song)} style={{ cursor: 'pointer' }}>{song.nombre}</strong> - {song.duracion} - {song.genero}
+                                        <strong onClick={() => handleSongClick(song)} style={{ cursor: 'pointer' }}>{song.orden}.{song.nombre}</strong> - {song.duracion} - {song.genero}
                                         <br />
                                         Popularidad: {song.popularidad}
                                         <br />
