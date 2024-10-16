@@ -36,7 +36,7 @@ export default function Register() {
             // Guardar el usuario en Firestore
             await setDoc(doc(db, "usuarios", user.uid), {
                 email: user.email,
-                uid: user.uid
+                id: user.uid
             });
 
             setSuccessMessage(`¡Registro exitoso! Bienvenido ${user.email}`);
