@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { FaGoogle, FaEye, FaEyeSlash, FaMusic } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';  // Importar useNavigate
 
@@ -13,6 +13,9 @@ export default function Login() {
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();  // Hook para navegar
+
+    // Proveedor de Google para autenticación
+    const googleProvider = new GoogleAuthProvider();
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -25,6 +28,19 @@ export default function Login() {
                 window.location.href = "/home";
             })
             .catch((error) => {
+                setError(error.message);
+            });
+    };
+
+    const handleGoogleLogin = () => {
+        signInWithPopup(auth, googleProvider)
+            .then((result) => {
+                const user = result.user;
+                console.log('Usuario logueado con Google:', user);
+                window.location.href = "/home"; // Navegar a la página de inicio
+            })
+            .catch((error) => {
+                console.error('Error al iniciar sesión con Google:', error);
                 setError(error.message);
             });
     };
@@ -79,7 +95,7 @@ export default function Login() {
                                 <span className="text-muted">O continúa con</span>
                             </div>
 
-                            <Button variant="outline-light" className="w-100 mb-3">
+                            <Button variant="outline-light" className="w-100 mb-3" onClick={handleGoogleLogin}>
                                 <FaGoogle className="me-2" />
                                 Iniciar sesión con Google
                             </Button>
