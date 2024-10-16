@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './components/Login'; // Asegúrate de que el componente Login esté importado
-import Home from './components/Home/Home';   // Importa tu componente Home
-import Register from './components/Register';
+import Login from './components/Login/Login';
+import Home from './components/Home/Home'; 
+import Register from './components/Login/Register';
 
 function App() {
   return (
