@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, storage, auth } from '../../firebaseConfig';
-import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Container, Row, Col, Card, Spinner, ListGroup, Button, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 export default function Home() {
     const [albums, setAlbums] = useState([]);
@@ -19,11 +19,11 @@ export default function Home() {
     const [playlists, setPlaylists] = useState([]);
     const [loadingPlaylists, setLoadingPlaylists] = useState(true);
     const [showPlaylists, setShowPlaylists] = useState({});
-    const [selectedPlaylist, setSelectedPlaylist] = useState(null); 
-    const [playlistSongs, setPlaylistSongs] = useState([]); 
-    const [playlistName, setPlaylistName] = useState(''); // Estado para el nombre de la playlist
-    const [showModal, setShowModal] = useState(false); // Estado para el modal
-    const playlistRef = useRef(null); 
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [playlistSongs, setPlaylistSongs] = useState([]);
+    const [playlistName, setPlaylistName] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const playlistRef = useRef(null);
 
     const navigate = useNavigate();
 
@@ -75,7 +75,7 @@ export default function Home() {
         }
     }, [user]);
 
-    // Agregar event listener para cerrar la lista al hacer clic afuera
+    // Escucha de eventos para cerrar el menú de playlist al hacer clic fuera
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (playlistRef.current && !playlistRef.current.contains(event.target)) {
@@ -107,11 +107,12 @@ export default function Home() {
         }
     };
 
-    const handleSongClick = (song) => {
-        if (playingSong === song.ruta) {
+    const handleSongClick = (song, source) => {
+        const songIdentifier = `${source}-${song.ruta}`;
+        if (playingSong === songIdentifier) {
             setPlayingSong(null);
         } else {
-            setPlayingSong(song.ruta);
+            setPlayingSong(songIdentifier);
         }
     };
 
@@ -122,16 +123,82 @@ export default function Home() {
 
     const handleAddToSelectedPlaylist = async (playlistId, song) => {
         const { nombre, duracion, ruta } = song;
+
+        // Referencia a la colección de canciones en la playlist seleccionada
+        const songsCollection = collection(db, `playlists/${playlistId}/canciones`);
+
+        // Consulta para verificar si la canción ya está en la playlist
+        const songsSnapshot = await getDocs(songsCollection);
+        const existingSong = songsSnapshot.docs.find(doc => doc.data().ruta === ruta);
+
+        if (existingSong) {
+            alert('Esta canción ya está en la playlist.');
+            return;
+        }
+
+        // Añadir la canción si no existe
         const songData = {
             nombre,
             duracion,
             ruta,
             orden: 0,
         };
-        const songsCollection = collection(db, `playlists/${playlistId}/canciones`);
+
         await addDoc(songsCollection, songData);
         setShowPlaylists({ ...showPlaylists, [song.id]: false });
     };
+
+    const handleDeleteSongFromPlaylist = async (songId, playlistId) => {
+        try {
+            // Referencia al documento específico de la canción en la colección de canciones de la playlist
+            const songDocRef = doc(db, `playlists/${playlistId}/canciones/${songId}`);
+
+            // Eliminar el documento de Firestore
+            await deleteDoc(songDocRef);
+
+            // Remover la canción del estado local de las canciones de la playlist
+            setPlaylistSongs((prevSongs) => prevSongs.filter((song) => song.id !== songId));
+
+            alert('Canción eliminada de la playlist.');
+        } catch (error) {
+            console.error('Error al eliminar la canción: ', error);
+            alert('Error al eliminar la canción. Inténtalo de nuevo más tarde.');
+        }
+    };
+
+    // Función para eliminar una playlist
+    const handleDeletePlaylist = async (playlistId) => {
+        try {
+            // Referencia a la colección de canciones dentro de la playlist
+            const songsCollection = collection(db, `playlists/${playlistId}/canciones`);
+    
+            // Obtener todas las canciones dentro de la playlist
+            const songsSnapshot = await getDocs(songsCollection);
+            
+            // Eliminar cada canción individualmente
+            const deleteSongPromises = songsSnapshot.docs.map((doc) => deleteDoc(doc.ref));
+            await Promise.all(deleteSongPromises);
+    
+            // Después de eliminar todas las canciones, eliminar la playlist
+            const playlistDocRef = doc(db, `playlists/${playlistId}`);
+            await deleteDoc(playlistDocRef);
+    
+            // Remover la playlist del estado local
+            setPlaylists((prevPlaylists) => prevPlaylists.filter((playlist) => playlist.id !== playlistId));
+    
+            // Si la playlist eliminada es la que está seleccionada, limpiar las canciones de esa playlist
+            if (selectedPlaylist === playlistId) {
+                setSelectedPlaylist(null); // Limpiar la playlist seleccionada
+                setPlaylistSongs([]); // Limpiar las canciones asociadas
+            }
+    
+            alert('Playlist y todas sus canciones han sido eliminadas con éxito.');
+        } catch (error) {
+            console.error('Error al eliminar la playlist: ', error);
+            alert('Error al eliminar la playlist. Inténtalo de nuevo más tarde.');
+        }
+    };
+    
 
     const handlePlaylistClick = async (playlistId) => {
         if (selectedPlaylist === playlistId) {
@@ -160,8 +227,8 @@ export default function Home() {
                 emailUsuario: user.email,
                 timestamp: new Date(),
             });
-            setPlaylistName(''); 
-            setShowModal(false); 
+            setPlaylistName('');
+            setShowModal(false);
             alert('Playlist creada con éxito');
             // Refetch playlists after creating a new one
             const playlistsQuery = query(
@@ -223,7 +290,7 @@ export default function Home() {
                                 {songs.map((song) => (
                                     <ListGroup.Item key={song.id} className="d-flex justify-content-between align-items-center position-relative">
                                         <span>
-                                            <strong onClick={() => handleSongClick(song)} style={{ cursor: 'pointer' }}>
+                                            <strong onClick={() => handleSongClick(song, 'album')} style={{ cursor: 'pointer' }}>
                                                 {song.orden}.{song.nombre}
                                             </strong> - {song.duracion}
                                         </span>
@@ -261,7 +328,7 @@ export default function Home() {
                                                 </ListGroup>
                                             </div>
                                         )}
-                                        {playingSong === song.ruta && <audio src={song.ruta} controls autoPlay />}
+                                        {playingSong === `album-${song.ruta}` && <audio src={song.ruta} controls autoPlay />}
                                     </ListGroup.Item>
                                 ))}
                             </ListGroup>
@@ -278,12 +345,12 @@ export default function Home() {
                     <Modal.Title>Crear Playlist</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <input 
-                        type="text" 
-                        value={playlistName} 
-                        onChange={(e) => setPlaylistName(e.target.value)} 
-                        placeholder="Nombre de la playlist" 
-                        className="form-control" 
+                    <input
+                        type="text"
+                        value={playlistName}
+                        onChange={(e) => setPlaylistName(e.target.value)}
+                        placeholder="Nombre de la playlist"
+                        className="form-control"
                     />
                 </Modal.Body>
                 <Modal.Footer>
@@ -304,10 +371,16 @@ export default function Home() {
                 {playlists.map((playlist) => (
                     <ListGroup.Item
                         key={playlist.id}
-                        onClick={() => handlePlaylistClick(playlist.id)}
+                        className="d-flex justify-content-between align-items-center"
                         style={{ cursor: 'pointer' }}
                     >
-                        {playlist.nombre}
+                        <span onClick={() => handlePlaylistClick(playlist.id)}>{playlist.nombre}</span>
+                        <FontAwesomeIcon
+                            icon={faTrash}
+                            style={{ cursor: 'pointer', marginLeft: '10px' }}
+                            onClick={() => handleDeletePlaylist(playlist.id)}
+                            title="Eliminar playlist"
+                        />
                     </ListGroup.Item>
                 ))}
             </ListGroup>
@@ -316,14 +389,23 @@ export default function Home() {
                     {playlistSongs.map((song) => (
                         <ListGroup.Item key={song.id} className="d-flex justify-content-between align-items-center">
                             <span>
-                                <strong onClick={() => handleSongClick(song)} style={{ cursor: 'pointer' }}>
+                                <strong onClick={() => handleSongClick(song, 'playlist')} style={{ cursor: 'pointer' }}>
                                     {song.nombre}
                                 </strong> - {song.duracion}
                             </span>
-                            {playingSong === song.ruta && <audio src={song.ruta} controls autoPlay />}
+                            <div>
+                                {playingSong === `playlist-${song.ruta}` && <audio src={song.ruta} controls autoPlay />}
+                                <FontAwesomeIcon
+                                    icon={faTrash}
+                                    style={{ cursor: 'pointer', marginLeft: '10px' }}
+                                    onClick={() => handleDeleteSongFromPlaylist(song.id, selectedPlaylist)}
+                                    title="Eliminar de playlist"
+                                />
+                            </div>
                         </ListGroup.Item>
                     ))}
                 </ListGroup>
+
             )}
 
         </Container>
