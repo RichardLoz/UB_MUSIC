@@ -2,10 +2,44 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { FaGoogle, FaEye, FaEyeSlash, FaMusic } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './login.css'
+import styled from 'styled-components';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
-import { useNavigate } from 'react-router-dom';  // Importar useNavigate
+import { useNavigate } from 'react-router-dom';
+
+const LoginContainer = styled(Container)`
+    height: 100vh;
+    padding: 0;
+`;
+
+const SideColumn = styled(Col)`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    color: white;
+    padding: 5rem;
+`;
+
+const RegisterButton = styled(Button)`
+    font-weight: bold;
+    color: #007bff;
+    padding: 0;
+    border: none;
+    background: none;
+    &:hover {
+        color: #0056b3;
+        text-decoration: none;
+    }
+`;
+
+const LoginImage = styled.div`
+    height: 100%;
+    width: 100%;
+    background-image: url('src/assets/images/login/login_ub.jpeg');
+    background-size: cover;
+    background-position: center;
+`;
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
@@ -13,12 +47,11 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
 
-    const navigate = useNavigate();  // Hook para navegar
+    const navigate = useNavigate();
 
     const handleLogin = (e) => {
         e.preventDefault();
         setError(null);
-
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
@@ -31,10 +64,10 @@ export default function Login() {
     };
 
     return (
-        <Container fluid className="vh-100 p-0">
+        <LoginContainer fluid>
             <Row className="h-100 m-0">
-                <Col md={6} className="d-flex align-items-center justify-content-center bg-dark text-white p-5">
-                    <div className="w-100" style={{ maxWidth: '400px' }}>
+                <SideColumn md={6}>
+                    <div style={{ maxWidth: '400px' }}>
                         <div className="text-center mb-4">
                             <FaMusic size={50} className="text-primary mb-3" />
                             <h1 className="h2 mb-3">Bienvenido a UB-Music</h1>
@@ -90,26 +123,18 @@ export default function Login() {
                             </div>
                         </Form>
 
-                        {/* Botón de registro */}
                         <div className="text-center mt-4">
                             <span className="text-primary">¿No tienes cuenta?</span>
-                            <Button variant="link" onClick={() => navigate("/register")} className="btn-register">
+                            <RegisterButton variant="link" onClick={() => navigate("/register")}>
                                 Registrarse
-                            </Button>
+                            </RegisterButton>
                         </div>
                     </div>
-                </Col>
+                </SideColumn>
                 <Col md={6} className="d-none d-md-block p-0">
-                    <div
-                        className="h-100 w-100"
-                        style={{
-                            backgroundImage: `url('src/assets/images/login/login_ub.jpeg')`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center'
-                        }}
-                    />
+                    <LoginImage />
                 </Col>
             </Row>
-        </Container>
+        </LoginContainer>
     );
 }
