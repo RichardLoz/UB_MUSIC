@@ -88,6 +88,7 @@ export default function Player({ currentSong, isPlaying, setIsPlaying }) {
     const [progress, setProgress] = useState(0);
     const audioRef = useRef(new Audio(currentSong?.url));
 
+    // Solo cambia el audio cuando cambia `currentSong`
     useEffect(() => {
         if (currentSong?.url) {
             audioRef.current.src = currentSong.url;
@@ -95,8 +96,9 @@ export default function Player({ currentSong, isPlaying, setIsPlaying }) {
                 audioRef.current.play();
             }
         }
-    }, [currentSong, isPlaying]);
+    }, [currentSong]); // Eliminamos `isPlaying` de esta dependencia
 
+    // Maneja el progreso y play/pausa sin reiniciar la canción
     useEffect(() => {
         const audio = audioRef.current;
         const updateProgress = () => setProgress((audio.currentTime / audio.duration) * 100);

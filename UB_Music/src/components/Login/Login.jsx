@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, InputGroup, Modal } from 'react-bootstrap';
 import { FaGoogle, FaEye, FaEyeSlash, FaMusic } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import styled from 'styled-components';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 
@@ -46,8 +46,13 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetError, setResetError] = useState(null);
+    const [resetSuccess, setResetSuccess] = useState(null);
 
     const navigate = useNavigate();
+    const googleProvider = new GoogleAuthProvider();
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -60,6 +65,33 @@ export default function Login() {
             })
             .catch((error) => {
                 setError(error.message);
+            });
+    };
+
+    const handleGoogleLogin = () => {
+        signInWithPopup(auth, googleProvider)
+            .then((result) => {
+                const user = result.user;
+                console.log('Usuario logueado con Google:', user);
+                window.location.href = "/home";
+            })
+            .catch((error) => {
+                console.error('Error al iniciar sesión con Google:', error);
+                setError(error.message);
+            });
+    };
+
+    const handleResetPassword = (e) => {
+        e.preventDefault();
+        setResetError(null);
+        setResetSuccess(null);
+
+        sendPasswordResetEmail(auth, resetEmail)
+            .then(() => {
+                setResetSuccess('Correo de restablecimiento enviado. Por favor, revisa tu bandeja de entrada.');
+            })
+            .catch((error) => {
+                setResetError('No se pudo enviar el correo de restablecimiento. Verifica el correo electrónico ingresado.');
             });
     };
 
@@ -113,13 +145,15 @@ export default function Login() {
                                 <span className="text-primary">O continúa con</span>
                             </div>
 
-                            <Button variant="outline-light" className="w-100 mb-3">
+                            <Button variant="outline-light" className="w-100 mb-3" onClick={handleGoogleLogin}>
                                 <FaGoogle className="me-2" />
                                 Iniciar sesión con Google
                             </Button>
 
                             <div className="text-center">
-                                <a href="#" className="text-primary">¿Olvidaste tu contraseña?</a>
+                                <a href="#" className="text-primary" onClick={() => setShowResetModal(true)}>
+                                    ¿Olvidaste tu contraseña?
+                                </a>
                             </div>
                         </Form>
 
@@ -135,6 +169,39 @@ export default function Login() {
                     <LoginImage />
                 </Col>
             </Row>
+
+            {/* Modal de restablecimiento de contraseña */}
+            <Modal show={showResetModal} onHide={() => setShowResetModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Restablecer Contraseña</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleResetPassword}>
+                        <Form.Group className="mb-3" controlId="formResetEmail">
+                            <Form.Label>Correo electrónico</Form.Label>
+                            <Form.Control
+                                type="email"
+                                placeholder="Ingresa tu correo"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+
+                        {resetError && <p className="text-danger">{resetError}</p>}
+                        {resetSuccess && <p className="text-success">{resetSuccess}</p>}
+
+                        <Button variant="primary" type="submit">
+                            Enviar enlace de restablecimiento
+                        </Button>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowResetModal(false)}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </LoginContainer>
     );
 }
