@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FaSignOutAlt, FaHeart } from 'react-icons/fa';
+import { FaSignOutAlt, FaHeart,FaHome } from 'react-icons/fa';
 import SidebarButton from './SidebarButton';
 
 const SidebarContainer = styled.div`
@@ -56,13 +56,9 @@ export default function Sidebar({onFavoritesClick, onSignOut }) {
     return (
         <SidebarContainer>
             <ProfileImage src="src/assets/images/profile/profile.jpg" alt="User Avatar" />
-            <FavoritesButton onClick={onFavoritesClick}>
-                <FaHeart size={24} />
-                <span>Favoritos</span>
-            </FavoritesButton>
-            <SignOutButton onClick={onSignOut}>
-                <FaSignOutAlt size={24} />
-            </SignOutButton>
+            <SidebarButton to="/home" icon={<FaHome />} title="Inicio" />
+            <SidebarButton to="/home/favorites" icon={<FaHeart />} title="Favoritos" />
+            <SidebarButton to="/signout" icon={<FaSignOutAlt />} title="Sign Out" />
         </SidebarContainer>
     );
 }

@@ -1,23 +1,41 @@
-import React from 'react'
-import { IconContext } from 'react-icons/lib'
-import { Link, useLocation } from 'react-router-dom'
-import './sidebarButton.css'
+import React from 'react';
+import { IconContext } from 'react-icons';
+import { Link, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 
-export default function SidebarButton(props) {
-  const location = useLocation()
+const ButtonContainer = styled(Link)`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #F8D9C0;
+    margin-top: 20px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+    &:hover {
+        color: #fff;
+        transform: scale(1.05);
+    }
+    &.active {
+        color: #fff;
+    }
+`;
 
-  const isActive = location.pathname.startsWith(props.to);
+const ButtonTitle = styled.p`
+    margin-top: 5px;
+    font-size: 0.9em;
+`;
 
-  const btnClass = isActive ? 'btn-body active' : 'btn-body'
-  return ( 
-    <Link to={props.to}>
-      <div className={btnClass}>
-        <IconContext.Provider value={{size: '24px', className: 'btn-icon'}}>
-          {props.icon}
-          <p className='btn-title'>{props.title}</p>
-        </IconContext.Provider>
-      </div>
-    </Link>
-  )
-  
+export default function SidebarButton({ to, icon, title }) {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+
+    return (
+        <ButtonContainer to={to} className={isActive ? 'active' : ''}>
+            <IconContext.Provider value={{ size: '24px' }}>
+                {icon}
+            </IconContext.Provider>
+            <ButtonTitle>{title}</ButtonTitle>
+        </ButtonContainer>
+    );
 }
