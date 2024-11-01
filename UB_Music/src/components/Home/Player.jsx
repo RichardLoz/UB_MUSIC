@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FaRandom, FaStepBackward, FaPlay, FaPause, FaStepForward, FaSync, FaHeart } from 'react-icons/fa';
@@ -11,7 +11,6 @@ const PlayerContainer = styled.div`
     background: linear-gradient(135deg, #1e3a8a, #312e81);
     padding: 20px;
     border-radius: 20px;
-    position: relative;
     color: white;
 `;
 
@@ -56,6 +55,7 @@ const ProgressBar = styled.div`
     border-radius: 5px;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 `;
 
 const Progress = styled(motion.div)`
@@ -84,46 +84,59 @@ const IconButton = styled.button`
     }
 `;
 
-export default function Player() {
-    const [isPlaying, setIsPlaying] = useState(false);
+export default function Player({ currentSong, isPlaying, setIsPlaying }) {
     const [progress, setProgress] = useState(0);
-    const [isFavorite, setIsFavorite] = useState(false);
-
-    const currentSong = {
-        title: "Visiting Hours",
-        artist: "Ed Sheeran",
-        cover: "src/assets/images/home/disco.jpg", // Asegúrate de tener esta imagen en tu proyecto
-    };
+    const audioRef = useRef(new Audio(currentSong?.url));
 
     useEffect(() => {
-        let interval;
-        if (isPlaying) {
-            interval = setInterval(() => {
-                setProgress((prev) => (prev >= 100 ? 0 : prev + 1));
-            }, 300);
+        if (currentSong?.url) {
+            audioRef.current.src = currentSong.url;
+            if (isPlaying) {
+                audioRef.current.play();
+            }
         }
-        return () => clearInterval(interval);
+    }, [currentSong, isPlaying]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        const updateProgress = () => setProgress((audio.currentTime / audio.duration) * 100);
+
+        if (isPlaying) {
+            audio.play();
+            audio.addEventListener('timeupdate', updateProgress);
+        } else {
+            audio.pause();
+        }
+
+        return () => audio.removeEventListener('timeupdate', updateProgress);
     }, [isPlaying]);
 
     const togglePlayPause = () => setIsPlaying(!isPlaying);
 
+    const handleProgressBarClick = (event) => {
+        const progressBar = event.target;
+        const clickPositionX = event.clientX - progressBar.getBoundingClientRect().left;
+        const progressBarWidth = progressBar.offsetWidth;
+        const clickRatio = clickPositionX / progressBarWidth;
+        const newTime = audioRef.current.duration * clickRatio;
+        audioRef.current.currentTime = newTime;
+        setProgress(clickRatio * 100);
+    };
+
     return (
         <PlayerContainer>
-            <AlbumCover animate={{ rotate: isPlaying ? 360 : 0 }} transition={{ repeat: Infinity, duration: 5, ease: "linear" }}>
-                <CoverImage src={currentSong.cover} alt="Album cover" />
+            <AlbumCover animate={{ rotate: isPlaying ? 360 : 0 }} transition={{ repeat: Infinity, duration: 5 }}>
+                <CoverImage src={currentSong?.cover || 'default_cover.jpg'} alt="Album cover" />
             </AlbumCover>
-
             <SongInfo>
-                <SongTitle>{currentSong.title}</SongTitle>
-                <SongArtist>{currentSong.artist}</SongArtist>
+                <SongTitle>{currentSong?.title || 'Selecciona una canción'}</SongTitle>
+                <SongArtist>{currentSong?.artist || ''}</SongArtist>
             </SongInfo>
-
             <ProgressContainer>
-                <ProgressBar>
+                <ProgressBar onClick={handleProgressBarClick}>
                     <Progress progress={progress} />
                 </ProgressBar>
             </ProgressContainer>
-
             <Controls>
                 <IconButton><FaRandom /></IconButton>
                 <IconButton><FaStepBackward /></IconButton>
@@ -132,9 +145,7 @@ export default function Player() {
                 </IconButton>
                 <IconButton><FaStepForward /></IconButton>
                 <IconButton><FaSync /></IconButton>
-                <IconButton active={isFavorite} onClick={() => setIsFavorite(!isFavorite)}>
-                    <FaHeart />
-                </IconButton>
+                <IconButton><FaHeart /></IconButton>
             </Controls>
         </PlayerContainer>
     );

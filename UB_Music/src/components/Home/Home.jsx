@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import Sidebar from '../sidebar/Sidebar';
 import RecentTracks from './RecentTracks';
 import RecommendedTracks from './RecommendedATracks';
 import Player from './Player';
@@ -13,8 +12,8 @@ const MainContent = styled.div`
     grid-template-rows: auto auto;
     gap: 20px;
     padding: 15px;
-    background-color: #181818; /* Fondo para abarcar todos los elementos */
-    overflow-y: auto; /* Permite desplazamiento si los elementos sobrepasan la altura */
+    background-color: #181818;
+    overflow-y: auto;
 `;
 
 const HeaderSection = styled.div`
@@ -32,23 +31,28 @@ const Section = styled.div`
 `;
 
 export default function Home() {
-  return (
-      <MainContent>
-         <HeaderSection>
-              <SearchBar onSearch={(query) => console.log("Buscando:", query)} />
-          </HeaderSection>
-          <Section style={{ gridColumn: '1 / 2', gridRow: '2 / 3' }}>
-              <Player />
-          </Section>
-          <Section style={{ gridColumn: '2 / 3', gridRow: '2 / 3' }}>
-              <RecommendedTracks />
-          </Section>
-          <Section style={{ gridColumn: '1 / 2', gridRow: '3 / 4' }}>
-              <RecentTracks />
-          </Section>
-          <Section style={{ gridColumn: '2 / 3', gridRow: '3 / 4' }}>
-              <TopArtists />
-          </Section>
-      </MainContent>
-  );
+    const [currentSong, setCurrentSong] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false); // Define isPlaying y setIsPlaying aquí
+
+    return (
+        <MainContent>
+            <HeaderSection>
+                <SearchBar onSearch={(query) => console.log("Buscando:", query)} />
+            </HeaderSection>
+            <Section style={{ gridColumn: '1 / 2', gridRow: '2 / 3' }}>
+                {/* Pasamos currentSong, isPlaying y setIsPlaying al Player */}
+                <Player currentSong={currentSong} isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
+            </Section>
+            <Section style={{ gridColumn: '2 / 3', gridRow: '2 / 3' }}>
+                <RecommendedTracks />
+            </Section>
+            <Section style={{ gridColumn: '1 / 2', gridRow: '3 / 4' }}>
+                {/* Pasamos setCurrentSong y setIsPlaying a RecentTracks */}
+                <RecentTracks setCurrentSong={setCurrentSong} setIsPlaying={setIsPlaying} />
+            </Section>
+            <Section style={{ gridColumn: '2 / 3', gridRow: '3 / 4' }}>
+                <TopArtists />
+            </Section>
+        </MainContent>
+    );
 }
