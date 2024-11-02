@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaPlay, FaClock } from 'react-icons/fa';
+import { FaClock, FaHeart } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, storage } from '../../firebaseConfig';
 import { ref, getDownloadURL } from 'firebase/storage';
@@ -79,6 +79,9 @@ const SongItem = styled.div`
     color: white;
     border-bottom: 1px solid #555;
     cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 `;
 
 export default function RecentTracks({ setCurrentSong, setIsPlaying }) {
@@ -101,7 +104,7 @@ export default function RecentTracks({ setCurrentSong, setIsPlaying }) {
             setAlbums(albumsList);
             setLoading(false);
         };
-        
+
         fetchAlbums();
     }, []);
 
@@ -154,8 +157,16 @@ export default function RecentTracks({ setCurrentSong, setIsPlaying }) {
                 <SongList>
                     <h3>Canciones</h3>
                     {songs.map((song) => (
-                        <SongItem key={song.id} onClick={() => handleSongClick(song)}>
-                            {song.orden}. {song.nombre} - {song.duracion}
+                        <SongItem key={song.id}>
+                            <div onClick={() => handleSongClick(song)}>
+                                {song.orden}. {song.nombre} - {song.duracion}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <FaHeart
+                                    style={{ cursor: 'pointer', marginRight: '10px' }}
+                                    title="Agregar a favoritos"
+                                />
+                            </div>
                         </SongItem>
                     ))}
                 </SongList>
