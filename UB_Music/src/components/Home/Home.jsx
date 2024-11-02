@@ -32,7 +32,7 @@ const Section = styled.div`
 
 export default function Home() {
     const [currentSong, setCurrentSong] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false); // Define isPlaying y setIsPlaying aquí
+    const [isPlaying, setIsPlaying] = useState(false);
 
     return (
         <MainContent>
@@ -40,18 +40,16 @@ export default function Home() {
                 <SearchBar onSearch={(query) => console.log("Buscando:", query)} />
             </HeaderSection>
             <Section style={{ gridColumn: '1 / 2', gridRow: '2 / 3' }}>
-                {/* Pasamos currentSong, isPlaying y setIsPlaying al Player */}
                 <Player currentSong={currentSong} isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
             </Section>
             <Section style={{ gridColumn: '2 / 3', gridRow: '2 / 3' }}>
                 <RecommendedTracks />
             </Section>
             <Section style={{ gridColumn: '1 / 2', gridRow: '3 / 4' }}>
-                {/* Pasamos setCurrentSong y setIsPlaying a RecentTracks */}
                 <RecentTracks setCurrentSong={setCurrentSong} setIsPlaying={setIsPlaying} />
             </Section>
             <Section style={{ gridColumn: '2 / 3', gridRow: '3 / 4' }}>
-                <TopArtists />
+                <TopArtists setCurrentSong={setCurrentSong} setIsPlaying={setIsPlaying} />
             </Section>
         </MainContent>
     );

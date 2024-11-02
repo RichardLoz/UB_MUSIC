@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { db, auth } from '../../firebaseConfig';
-import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Button, Modal, ListGroup } from 'react-bootstrap';
+import { FaTrash } from 'react-icons/fa';
 
 const PlaylistContainer = styled.div`
     padding: 20px;
@@ -21,12 +22,33 @@ const StyledListGroupItem = styled(ListGroup.Item)`
     padding: 15px;
 `;
 
-export default function UserPlaylists() {
+const PlaylistActions = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const IconButton = styled.button`
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 1.2em;
+
+    &:hover {
+        color: #ff1a1a;
+    }
+`;
+
+export default function UserPlaylists({ setCurrentSong, setIsPlaying }) {
     const [user, setUser] = useState(null);
     const [playlists, setPlaylists] = useState([]);
     const [loadingPlaylists, setLoadingPlaylists] = useState(true);
     const [playlistName, setPlaylistName] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+    const [songs, setSongs] = useState([]);
+    const [loadingSongs, setLoadingSongs] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -93,6 +115,57 @@ export default function UserPlaylists() {
         }
     };
 
+    const handlePlaylistClick = async (playlistId) => {
+        setLoadingSongs(true);
+        const songsCollection = collection(db, `playlists/${playlistId}/canciones`);
+        const songsSnapshot = await getDocs(songsCollection);
+        const songsList = songsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setSongs(songsList);
+        setSelectedPlaylist(playlistId);
+        setLoadingSongs(false);
+    };
+
+    const handleSongClick = (song) => {
+        setCurrentSong({
+            title: song.nombre,
+            artist: song.artista || '',
+            cover: song.portada || '', // Ahora incluimos la portada en el objeto de la canción
+            url: song.ruta,
+        });
+        setIsPlaying(true);
+    };
+
+    const handleDeleteSong = async (songId) => {
+        try {
+            // Utilizando la referencia correcta al documento de la canción
+            const songDocRef = doc(db, `playlists/${selectedPlaylist}/canciones`, songId);
+            await deleteDoc(songDocRef);
+
+            // Actualizar la lista de canciones localmente para reflejar la eliminación
+            setSongs(songs.filter((song) => song.id !== songId));
+            alert('Canción eliminada exitosamente');
+        } catch (error) {
+            console.error('Error al eliminar la canción:', error);
+            alert('Hubo un error al eliminar la canción. Por favor intenta de nuevo.');
+        }
+    };
+
+    const handleDeletePlaylist = async (playlistId) => {
+        try {
+            const playlistDoc = doc(db, `playlists/${playlistId}`);
+            await deleteDoc(playlistDoc);
+            setPlaylists(playlists.filter((playlist) => playlist.id !== playlistId));
+            if (selectedPlaylist === playlistId) {
+                setSelectedPlaylist(null);
+                setSongs([]);
+            }
+            alert('Playlist eliminada exitosamente');
+        } catch (error) {
+            console.error('Error al eliminar la playlist:', error);
+            alert('Hubo un error al eliminar la playlist. Por favor intenta de nuevo.');
+        }
+    };
+
     return (
         <PlaylistContainer>
             <h2>Tus Playlists</h2>
@@ -102,10 +175,41 @@ export default function UserPlaylists() {
                 <ListGroup>
                     {playlists.map((playlist) => (
                         <StyledListGroupItem key={playlist.id}>
-                            {playlist.nombre}
+                            <PlaylistActions>
+                                <span onClick={() => handlePlaylistClick(playlist.id)} style={{ cursor: 'pointer' }}>
+                                    {playlist.nombre}
+                                </span>
+                                <IconButton onClick={() => handleDeletePlaylist(playlist.id)} title="Eliminar Playlist">
+                                    <FaTrash />
+                                </IconButton>
+                            </PlaylistActions>
                         </StyledListGroupItem>
                     ))}
                 </ListGroup>
+            )}
+
+            {selectedPlaylist && (
+                <div>
+                    <h3>Canciones en la Playlist</h3>
+                    {loadingSongs ? (
+                        <p>Cargando canciones...</p>
+                    ) : (
+                        <ListGroup>
+                            {songs.map((song) => (
+                                <StyledListGroupItem key={song.id}>
+                                    <PlaylistActions>
+                                        <span onClick={() => handleSongClick(song)} style={{ cursor: 'pointer' }}>
+                                            {song.nombre} - {song.duracion}
+                                        </span>
+                                        <IconButton onClick={() => handleDeleteSong(song.id)} title="Eliminar Canción">
+                                            <FaTrash />
+                                        </IconButton>
+                                    </PlaylistActions>
+                                </StyledListGroupItem>
+                            ))}
+                        </ListGroup>
+                    )}
+                </div>
             )}
 
             <Button variant="primary" onClick={() => setShowModal(true)} className="mt-4">
